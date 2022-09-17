@@ -1,0 +1,10 @@
+add r1, 2
+add r3, 4
+mov r2, 5
+LABEL:
+cmp r1,r2
+add r2, r1
+jmp LABEL
+mov r9, 5
+mul r9, 2
+
