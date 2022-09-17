@@ -5,7 +5,7 @@ Steps for testing:
   - nodemon app.js 
 
 For testing CPU commands you should add command in  text.txt file
-Cpu Registers are r1 ~ r10 
+# Cpu Registers are r1 ~ r10 
 Example commands`
 - add r1, 2
 - add r3, 4
