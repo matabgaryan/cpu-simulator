@@ -1,14 +1,14 @@
 const constantValues = require('../configs/constants');
 const readFile = require('./ReadFile');
-const helpers = require('../services/helpers');
-const { commandNames } = constantValues;
+const {CPUHelpers} = require('../services/Helpers');
+const { commandNames, arithmeticActionTypes } = constantValues;
 
 class MainCpu {
+    cpuHelpers = new CPUHelpers();
     commands = [];
     registers = {}
     registerNames = [];
     flag = 0;
-    currentCommand = {commandName: '', arg1: '', arg2: ''};
     currentCommandIndex = 0;
     currentLabelIndex;
     currentLabelName;
@@ -25,68 +25,60 @@ class MainCpu {
         }
     }
 
+    arithmeticAction(arg1, arg2){
+        const {isNumber, isRegister } = this.cpuHelpers;
+        if (isRegister(arg1) && isNumber(arg2)){
+            return {num1: Number(this.registers[arg1]), num2: Number(arg2), assignToReg: true}
+        }
+
+        if (this.registerNames.includes(arg2) && this.cpuHelpers.isNumber(arg1)){
+            return {num1: Number(this.registers[arg1]), num2: Number(this.registers[arg2]), assignToReg: false}
+        }
+        if (this.registerNames.includes(arg1) && this.registerNames.includes(arg2)){
+            return {num1: Number(this.registers[arg1]), num2: Number(arg2), assignToReg: true}
+
+        }
+        if(this.cpuHelpers.isNumber(arg1) && this.cpuHelpers.isNumber(arg2)){
+            return {num1: Number(arg1), num2: Number(arg2), assignToReg: false}
+        }
+        return {num1: 0, num2: 0, assignToReg: false}
+    }
+
     move(src, dest){
-        const registername = src;
-        if (this.registerNames.includes(dest)){
+        const {isNumber, isRegister } = this.cpuHelpers;
+        if (isRegister(dest)){
             return this.registers[src] = Number(this.registers[dest]);
         }
-        if(this.registerNames.includes(src) && helpers.isNum(dest)){
+        if(isRegister(src) && isNumber(dest)){
             return this.registers[src] = Number(dest);
         }
         return
     }
 
     add(arg1, arg2){
-        if (this.registerNames.includes(arg1) && helpers.isNum(arg2)){
-            this.registers[arg1] = Number(this.registers[arg1]) + Number(arg2);
-            return this.registers[arg1];
-        }
-
-        if (this.registerNames.includes(arg2) && helpers.isNum(arg1)){
-            return Number(this.registers[arg1]) + Number(this.registers[arg2]);
-        }
-        if (this.registerNames.includes(arg1) && this.registerNames.includes(arg2)){
-            this.registers[arg1] = Number(this.registers[arg1]) + Number(this.registers[arg2]);
-            return this.registers[arg1];
-        }
-        if(helpers.isNum(arg1) && helpers.isNum(arg2)){
-            return arg1 + arg2
-        }
+        const { num1, num2, assignToReg } = this.arithmeticAction(arg1, arg2);
+        console.log(num1, num2, 'num1, num2')
+        if (assignToReg) return this.registers[arg1] = num1 + num2;
     }
 
     sub(arg1, arg2){
-        if (this.registerNames.includes(arg1) && helpers.isNum(arg2)){
-            this.registers[arg1] = Number(this.registers[arg1]) - Number(arg2);
-            return this.registers[arg1];
-        }
-        if (this.registerNames.includes(arg2) && helpers.isNum(arg1)){
-            return Number(this.registers[arg1]) - Number(this.registers[arg2]);
-        }
-        if (this.registerNames.includes(arg1) && this.registerNames.includes(arg2)){
-            this.registers[arg1] = Number(this.registers[arg1]) - Number(this.registers[arg2]);
-            return this.registers[arg1];
-        }
-        if(helpers.isNum(arg1) && helpers.isNum(arg2)){
-            return arg1 - arg2
-        }
+        const { num1, num2, assignToReg } = this.arithmeticAction(arg1, arg2);
+        console.log(num1, num2, 'num1, num2')
+        if (assignToReg) return this.registers[arg1] = num1 - num2;
     }
 
     mul(arg1, arg2){
-        if (this.registerNames.includes(arg1) && helpers.isNum(arg2)){
-            this.registers[arg1] = Number(this.registers[arg1]) * Number(arg2);
-            return this.registers[arg1];
-        }
-        if (this.registerNames.includes(arg2) && helpers.isNum(arg1)){
-            return Number(this.registers[arg1]) * Number(this.registers[arg2]);
-        }
-        if (this.registerNames.includes(arg1) && this.registerNames.includes(arg2)){
-            this.registers[arg1] = Number(this.registers[arg1]) * Number(this.registers[arg2]);
-            return this.registers[arg1];
-        }
-        if(helpers.isNum(arg1) && helpers.isNum(arg2)){
-            return Number(arg1) * Number(arg2)
-        }
+        const { num1, num2, assignToReg } = this.arithmeticAction(arg1, arg2);
+        console.log(num1, num2, 'num1, num2')
+        if (assignToReg) return this.registers[arg1] = num1 * num2;
     }
+
+    divide(arg1, arg2){
+        const { num1, num2, assignToReg } = this.arithmeticAction(arg1, arg2);
+        if (assignToReg) return this.registers[arg1] = num1 / num2;
+    }
+
+
 
     cmp(arg1, arg2){
         const arg1Value = this.registerNames.includes(arg1) ? this.registers[arg1.trim()] : arg1;
@@ -130,6 +122,9 @@ class MainCpu {
                 break;
             case commandNames.mul:
                 this.mul(arg1, arg2);
+                break;
+            case commandNames.div:
+                this.divide(arg1, arg2);
                 break;
             case commandNames.cmp:
                 this.cmp(arg1, arg2);
