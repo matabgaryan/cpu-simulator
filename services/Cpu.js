@@ -31,14 +31,14 @@ class MainCpu {
             return {num1: Number(this.registers[arg1]), num2: Number(arg2), assignToReg: true}
         }
 
-        if (this.registerNames.includes(arg2) && this.cpuHelpers.isNumber(arg1)){
+        if (isRegister(arg2) && isNumber(arg1)){
             return {num1: Number(this.registers[arg1]), num2: Number(this.registers[arg2]), assignToReg: false}
         }
-        if (this.registerNames.includes(arg1) && this.registerNames.includes(arg2)){
+        if (isRegister(arg1) && isNumber(arg2)){
             return {num1: Number(this.registers[arg1]), num2: Number(arg2), assignToReg: true}
 
         }
-        if(this.cpuHelpers.isNumber(arg1) && this.cpuHelpers.isNumber(arg2)){
+        if(isRegister(arg1) && isNumber(arg2)){
             return {num1: Number(arg1), num2: Number(arg2), assignToReg: false}
         }
         return {num1: 0, num2: 0, assignToReg: false}
@@ -57,19 +57,16 @@ class MainCpu {
 
     add(arg1, arg2){
         const { num1, num2, assignToReg } = this.arithmeticAction(arg1, arg2);
-        console.log(num1, num2, 'num1, num2')
         if (assignToReg) return this.registers[arg1] = num1 + num2;
     }
 
     sub(arg1, arg2){
         const { num1, num2, assignToReg } = this.arithmeticAction(arg1, arg2);
-        console.log(num1, num2, 'num1, num2')
         if (assignToReg) return this.registers[arg1] = num1 - num2;
     }
 
     mul(arg1, arg2){
         const { num1, num2, assignToReg } = this.arithmeticAction(arg1, arg2);
-        console.log(num1, num2, 'num1, num2')
         if (assignToReg) return this.registers[arg1] = num1 * num2;
     }
 
@@ -77,7 +74,6 @@ class MainCpu {
         const { num1, num2, assignToReg } = this.arithmeticAction(arg1, arg2);
         if (assignToReg) return this.registers[arg1] = num1 / num2;
     }
-
 
 
     cmp(arg1, arg2){
